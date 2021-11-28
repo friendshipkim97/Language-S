@@ -195,15 +195,18 @@ public class Sint {
     State allocate (Decls ds, State state) {
         // Allocate Implementation
         for (Decl d : ds) {
-            return state.push(d.id, V(d.expr, state));
+            state.push(d.id, V(d.expr, state));
         }
-        return null;
+        return state;
     }
 
     // (8) Free Function Implementation
     State free (Decls ds, State state) {
 	    // Free Implementation
-        return null;
+        for (Decl d : ds) {
+            state.popByIndex(state.lookup(d.id));
+        }
+        return state;
     }
 
     

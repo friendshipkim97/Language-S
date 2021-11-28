@@ -24,32 +24,45 @@ class State extends Stack<Pair> {
     // (1) Push function Implementation
     public State push(Identifier id, Value val) {
     	// Push Implementation
-        Pair push = push(new Pair(id, val));
-
+        push(new Pair(id, val));
+        return this;
     }
 
     // (2) Pop function Implementation (Optional)
     public Pair pop() {
     	// Pop Implementation (Optional)
-        return this.pop();
+        return remove(size() - 1);
+    }
+
+    // (2) Pop function Implementation (Optional)
+    public Pair popByIndex(int index) {
+        // Pop Implementation (Optional)
+        return remove(index);
     }
     
     // (3) Lookup function Implementation
     public int lookup (Identifier v) {
        // Lookup Implementation
-        return this.lookup(v);
+        for(int i=0; i<size()-1; i++){
+            if(this.get(i).id.equals(v)){
+                return i;
+            }
+        }
+        return -1;
     }
 
     // (4) Set Function Implementation
     public State set(Identifier id, Value val) {
     	// Set Implementation
-        return this.set(id, val);
+        this.set(size()+1, new Pair(id, val));
+        return this;
     }
     
     // (5) Get Function Implementation
     public Value get (Identifier id) {
     	// Get Implementation
-        return this.get(id);
+        int lookup = lookup(id);
+        return this.get(lookup).val;
     }
 
 }
