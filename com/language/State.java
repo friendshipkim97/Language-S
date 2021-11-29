@@ -34,7 +34,6 @@ class State extends Stack<Pair> {
         return remove(size() - 1);
     }
 
-    // (2) Pop function Implementation (Optional)
     public Pair popByIndex(int index) {
         // Pop Implementation (Optional)
         return remove(index);
@@ -43,7 +42,7 @@ class State extends Stack<Pair> {
     // (3) Lookup function Implementation
     public int lookup (Identifier v) {
        // Lookup Implementation
-        for(int i=0; i<size()-1; i++){
+        for(int i=0; i<size(); i++){
             if(this.get(i).id.equals(v)){
                 return i;
             }
@@ -54,7 +53,7 @@ class State extends Stack<Pair> {
     // (4) Set Function Implementation
     public State set(Identifier id, Value val) {
     	// Set Implementation
-        this.set(size()+1, new Pair(id, val));
+        this.set(size(), new Pair(id, val));
         return this;
     }
     

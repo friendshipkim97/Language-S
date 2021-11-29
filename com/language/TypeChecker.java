@@ -107,11 +107,46 @@ public class TypeChecker {
     // (1) Binary Type Check Implementation
     static Type Check(Binary b, TypeEnv te) {
         // Binary Implementation
+        Type t1 = Check(b.expr1, te);
+        Type t2 = Check(b.expr2, te);
+        switch (b.op.val){
+        case "+": case "-": case "*": case "/":
+            if(t1 == Type.INT && t2 == Type.INT)
+                b.type = Type.INT;
+            else
+                error(b, "type error for " + b.op);
+            break;
+        case "<": case "<=": case "==": case ">": case ">=": case "!=":
+            if(t1 == t2)
+                b.type = Type.BOOL;
+            else
+                error(b, "type error for " + b.op);
+            break;
+        default:
+            throw new IllegalArgumentException("undefined operator");
+        }
+        return b.type;
     }
     
     // (2) Unary Type Check Implementation
     static Type Check(Unary u, TypeEnv te) {
         // Unary Implementation
+        Type t1 = Check(u.expr, te);
+        switch (u.op.val){
+        case "!":
+            if(t1 == Type.BOOL)
+                u.type = Type.BOOL;
+            else error(u, "! has non-bool operand");
+            break;
+        case "-":
+            if(t1 == Type.INT)
+                u.type = Type.INT;
+            else error(u, "Unary - has non-int operand");
+            break;
+        default:
+            throw new IllegalArgumentException("undefined operator");
+        }
+        return u.type;
     }
     
     
@@ -175,26 +210,70 @@ public class TypeChecker {
     // (3) Assignment Type Check Implementation
     static Type Check(Assignment a, TypeEnv te) {
         // Assignment Implementation
+        if(!te.contains(a.id)){
+            error(a, " undefined variable in assignment: " + a.id);
+            return Type.ERROR;
+        }
+        Type t1 = te.get(a.id);
+        Type t2 = Check(a.expr, te);
+        if(t1 == t2)
+            a.type = Type.VOID;
+        else
+            error(a, "mixed mode assignment to " + a.id);
+        return a.type;
     }
 
     // (4) If Type Check Implementation
     static Type Check(If c, TypeEnv te) {
     	// If Implementation
+        Type t = Check(c.expr,te);
+        Type t1 = Check(c.stmt1, te);
+        Type t2 = Check(c.stmt2, te);
+        if (t == Type.BOOL)
+            if (t1 == t2)
+                c.type = t1;
+            else
+                error(c, "non-equal type in two branches");
+        else
+            error(c, "non-bool test in condition");
+        return c.type;
     }
 
     // (5) While Type Check Implementation
     static Type Check(While l, TypeEnv te) {
         // While Implementation
+        Type t = Check(l.expr,te);
+        Type t1 = Check(l.stmt, te);
+        if (t == Type.BOOL)
+            if (t1 == Type.VOID)
+                l.type = t1;
+            else
+                error(l, "return in loop..");
+        else
+            error(l, "non-bool test in loop");
+        return l.type;
     }
 
     // (6) Stmts Type Check Implementation
     static Type Check(Stmts ss, TypeEnv te) {
 	    // Stmts Implementation
+        Type t = Type.VOID;
+        for (int i=0; i < ss.stmts.size(); i++) {
+            t = Check(ss.stmts.get(i), te);
+            if (t != Type.VOID && i != ss.stmts.size()-1)
+                error(ss, "return in Stmts");
+        }
+        if (ss.type != Type.ERROR) ss.type = t;
+        return ss.type;
     }
 
     // (7) Let Type Check Implementation
     static Type Check(Let l, TypeEnv te) {
         // Let Type Check Implementation
+        addType(l.decls, te);
+        l.type = Check(l.stmts, te);
+        deleteType(l.decls, te);
+        return l.type;
     }
 
     static Type Check(Raise r, TypeEnv te) {

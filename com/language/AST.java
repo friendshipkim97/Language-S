@@ -4,7 +4,19 @@ import java.util.*;
 
 abstract class Command {
     // Command = Decl | Function | Stmt
-    Type type =Type.UNDEF;
+    Type type = Type.UNDEF;
+    protected boolean undef = true;
+    Object value = null; // Type type;
+
+    public Command() {
+    }
+
+//    Command(Object v) {
+//        if (v instanceof Decl) type = Type.INT;
+//        if (v instanceof Function) type = Type.FUN;
+//        if (v instanceof Stmt) type = Type.STMT;
+//        value = v; undef = false;
+//    }
 }
 
 class Decls extends ArrayList<Decl> {
@@ -70,6 +82,17 @@ class Type {
     final static Type RAISEDEXC = new Type("raisedexc");
     final static Type UNDEF = new Type("undef");
     final static Type ERROR = new Type("error");
+
+    // ADD
+//    final static Type STMT = new Type("stmt");
+//    final static Type STMTS = new Type("stmts");
+//    final static Type EMPTY = new Type("empty");
+//    final static Type ASSIGNMENT = new Type("assignment");
+//    final static Type IF = new Type("if");
+//    final static Type WHILE = new Type("while");
+//    final static Type LET = new Type("let");
+//    final static Type READ = new Type("read");
+//    final static Type PRINT = new Type("print");
     
     protected String id;
     protected Type(String s) { id = s; }
@@ -89,6 +112,24 @@ class ProtoType extends Type {
 
 abstract class Stmt extends Command {
     // Stmt = Empty | Stmts | Assignment | If  | While | Let | Read | Print
+
+    protected boolean undef = true;
+    Object value = null; // Type type;
+
+    public Stmt() {
+    }
+
+//    Stmt(Object v) {
+//        if (v instanceof Empty) type = Type.EMPTY;
+//        if (v instanceof Stmts) type = Type.STMTS;
+//        if (v instanceof Assignment) type = Type.ASSIGNMENT;
+//        if (v instanceof If) type = Type.IF;
+//        if (v instanceof While) type = Type.WHILE;
+//        if (v instanceof Let) type = Type.LET;
+//        if (v instanceof Read) type = Type.READ;
+//        if (v instanceof Print) type = Type.PRINT;
+//        value = v; undef = false;
+//    }
 }
 
 class Empty extends Stmt {
@@ -293,9 +334,9 @@ class Value extends Expr {
     
     Value(Type t) {
         type = t;  
-        if (type == Type.INT) value = new Integer(0);
-        if (type == Type.BOOL) value = new Boolean(false);
-        if (type == Type.STRING) value = "";
+        if (type == Type.INT) value = Integer.valueOf(0);
+        if (type == Type.BOOL) this.value = Boolean.valueOf(false);
+        if (type == Type.STRING) this.value = "";
         undef = false;
     }
 
