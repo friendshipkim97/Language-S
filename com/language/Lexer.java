@@ -1,12 +1,10 @@
 package com.language;// Lexer.java
 // Lexical analyzer for S
 
-import com.language.Token;
-
 import java.io.*;
 
 public class Lexer {
-    private char ch = ' '; 
+    private char ch = ' ';
     private BufferedReader input;
     private final char eolnCh = '\n';
     private final char eofCh = '\004';
@@ -23,14 +21,14 @@ public class Lexer {
     }
 
     public Lexer ( ) { // from standard input 
-	    input = new BufferedReader(new InputStreamReader(System.in));
+        input = new BufferedReader(new InputStreamReader(System.in));
     }
 
     private char getchar() { // Return next char
         int c = 0;
-        try { 
+        try {
             c = input.read();
-            if (c == -1) 
+            if (c == -1)
                 c = eofCh;
         } catch(IOException e) { System.err.println(e);}
         return (char) c;
@@ -45,7 +43,7 @@ public class Lexer {
                     ch = getchar();
                 } while (Character.isLetter(ch) || Character.isDigit(ch));
                 return Token.idORkeyword(s);
-            } 
+            }
 
             if (Character.isDigit(ch)) { // number 
                 String s = "";
@@ -54,77 +52,77 @@ public class Lexer {
                     ch = getchar();
                 } while (Character.isDigit(ch));
                 return Token.NUMBER.setValue(s);
-            } 
+            }
 
-	        switch (ch) {
-            case ' ': case '\t': case '\r': 
-                ch = getchar();
-                break;
-
-	        case eolnCh:
-		        ch = getchar(); 
-			    if (ch == '\r')			// for Windows
-			        ch = getchar();		// for Windows
-		        if (ch == eolnCh && interactive)
-		            return Token.EOF;
-				break;
-
-            case '/':  // divide 
-                ch = getchar();
-                if (ch != '/')  return Token.DIVIDE;
-                do { 	
+            switch (ch) {
+                case ' ': case '\t': case '\r':
                     ch = getchar();
-                } while (ch != eolnCh);
-                ch = getchar();
-                break;
-            
-	        case '\"':  // string literal
-                String s ="";
-		        while ((ch = getchar()) != '\"')
-		            s += ch;
-                ch = getchar();
-                return Token.STRLITERAL.setValue(s);
-                
-            case eofCh:  case '.':   
-		        return Token.EOF;
-            case '+': ch = getchar();
-                return Token.PLUS;
-            case '-': ch = getchar();
-                return Token.MINUS;
-            case '*': ch = getchar();
-                return Token.MULTIPLY;
-            case '(': ch = getchar();
-                return Token.LPAREN;
-            case ')': ch = getchar();
-                return Token.RPAREN;
-            case '{': ch = getchar();
-                return Token.LBRACE;
-            case '}': ch = getchar();
-                return Token.RBRACE;
-            case '[': ch = getchar();
-                return Token.LBRACKET;
-            case ']': ch = getchar();
-                return Token.RBRACKET;
-            case ';': ch = getchar();
-                return Token.SEMICOLON;
-            case ',': ch = getchar();
-                return Token.COMMA;
-            case '&': ch = getchar(); 
-		        return Token.AND;
-            case '|': ch = getchar(); 
-		        return Token.OR;
-            case '=': ch = getchar(); 
-                if (ch != '=') return Token.ASSIGN;
-                else {ch = getchar(); return Token.EQUAL;}
-            case '<': ch = getchar();
-                if (ch != '=') return Token.LT;
-                else {ch = getchar(); return Token.LTEQ;}
-            case '>': ch = getchar();
-                if (ch != '=') return Token.GT;
-                else {ch = getchar(); return Token.GTEQ;}
-            case '!': ch = getchar();
-                if (ch != '=') return Token.NOT;
-                else {ch = getchar(); return Token.NOTEQ;}
+                    break;
+
+                case eolnCh:
+                    ch = getchar();
+                    if (ch == '\r')			// for Windows
+                        ch = getchar();		// for Windows
+                    if (ch == eolnCh && interactive)
+                        return Token.EOF;
+                    break;
+
+                case '/':  // divide
+                    ch = getchar();
+                    if (ch != '/')  return Token.DIVIDE;
+                    do {
+                        ch = getchar();
+                    } while (ch != eolnCh);
+                    ch = getchar();
+                    break;
+
+                case '\"':  // string literal
+                    String s ="";
+                    while ((ch = getchar()) != '\"')
+                        s += ch;
+                    ch = getchar();
+                    return Token.STRLITERAL.setValue(s);
+
+                case eofCh:  case '.':
+                    return Token.EOF;
+                case '+': ch = getchar();
+                    return Token.PLUS;
+                case '-': ch = getchar();
+                    return Token.MINUS;
+                case '*': ch = getchar();
+                    return Token.MULTIPLY;
+                case '(': ch = getchar();
+                    return Token.LPAREN;
+                case ')': ch = getchar();
+                    return Token.RPAREN;
+                case '{': ch = getchar();
+                    return Token.LBRACE;
+                case '}': ch = getchar();
+                    return Token.RBRACE;
+                case '[': ch = getchar();
+                    return Token.LBRACKET;
+                case ']': ch = getchar();
+                    return Token.RBRACKET;
+                case ';': ch = getchar();
+                    return Token.SEMICOLON;
+                case ',': ch = getchar();
+                    return Token.COMMA;
+                case '&': ch = getchar();
+                    return Token.AND;
+                case '|': ch = getchar();
+                    return Token.OR;
+                case '=': ch = getchar();
+                    if (ch != '=') return Token.ASSIGN;
+                    else {ch = getchar(); return Token.EQUAL;}
+                case '<': ch = getchar();
+                    if (ch != '=') return Token.LT;
+                    else {ch = getchar(); return Token.LTEQ;}
+                case '>': ch = getchar();
+                    if (ch != '=') return Token.GT;
+                    else {ch = getchar(); return Token.GTEQ;}
+                case '!': ch = getchar();
+                    if (ch != '=') return Token.NOT;
+                    else {ch = getchar(); return Token.NOTEQ;}
             } // switch
         } while (true);
     } // next
@@ -136,15 +134,15 @@ public class Lexer {
 
     static public void main ( String[] args ) {
         Lexer lexer;
-	    if (args.length == 0)
+        if (args.length == 0)
             lexer = new Lexer( );
-	    else
+        else
             lexer = new Lexer(args[0]);
 
         Token tok = lexer.getToken( );
         while (tok != Token.EOF) {
             System.out.println(tok.toString());
             tok = lexer.getToken( );
-        } 
+        }
     } // main
 }

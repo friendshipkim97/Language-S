@@ -1,48 +1,48 @@
 package com.language;
 
 import java.util.*;
-// State as stack 
+// State as stack
 
-// <id, val> 
+// <id, val>
 class Pair {
-   Identifier id;
-   Value val;
-   
-   Pair (Identifier id, Value v) {
-     this.id = id;
-     this.val = v;
-   }
+    Identifier id;
+    Value val;
+
+    Pair (Identifier id, Value v) {
+        this.id = id;
+        this.val = v;
+    }
 }
 
 class State extends Stack<Pair> {
     public State( ) { }
-    
+
     public State(Identifier id, Value val) {
         push(id, val);
     }
 
     // (1) Push function Implementation
     public State push(Identifier id, Value val) {
-    	// Push Implementation
+        // Push Implementation
         push(new Pair(id, val));
         return this;
     }
 
     // (2) Pop function Implementation (Optional)
     public Pair pop() {
-    	// Pop Implementation (Optional)
-        return remove(size() - 1);
+        // Pop Implementation (Optional)
+        return remove(size());
     }
 
     public Pair popByIndex(int index) {
         // Pop Implementation (Optional)
         return remove(index);
     }
-    
+
     // (3) Lookup function Implementation
     public int lookup (Identifier v) {
-       // Lookup Implementation
-        for(int i=0; i<size(); i++){
+        // Lookup Implementation
+        for(int i=size()-1; i>=0; i--){
             if(this.get(i).id.equals(v)){
                 return i;
             }
@@ -52,14 +52,14 @@ class State extends Stack<Pair> {
 
     // (4) Set Function Implementation
     public State set(Identifier id, Value val) {
-    	// Set Implementation
-        this.set(size(), new Pair(id, val));
+        // Set Implementation
+        this.set(lookup(id), new Pair(id, val));
         return this;
     }
-    
+
     // (5) Get Function Implementation
     public Value get (Identifier id) {
-    	// Get Implementation
+        // Get Implementation
         int lookup = lookup(id);
         return this.get(lookup).val;
     }

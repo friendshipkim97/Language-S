@@ -5,18 +5,6 @@ import java.util.*;
 abstract class Command {
     // Command = Decl | Function | Stmt
     Type type = Type.UNDEF;
-    protected boolean undef = true;
-    Object value = null; // Type type;
-
-    public Command() {
-    }
-
-//    Command(Object v) {
-//        if (v instanceof Decl) type = Type.INT;
-//        if (v instanceof Function) type = Type.FUN;
-//        if (v instanceof Stmt) type = Type.STMT;
-//        value = v; undef = false;
-//    }
 }
 
 class Decls extends ArrayList<Decl> {
@@ -24,27 +12,27 @@ class Decls extends ArrayList<Decl> {
 
     Decls() { super(); };
     Decls(Decl d) {
-	this.add(d);
+        this.add(d);
     }
 }
 
 class Decl extends Command {
-    // Decl = Type type; Identifier id 
+    // Decl = Type type; Identifier id
     Identifier id;
     Expr expr = null;
     int arraysize = 0;
 
     Decl (String s, Type t) {
         id = new Identifier(s); type = t;
-    } // declaration 
+    } // declaration
 
     Decl (String s, Type t, int n) {
         id = new Identifier(s); type = t; arraysize = n;
-    } // array declaration 
+    } // array declaration
 
     Decl (String s, Type t, Expr e) {
         id = new Identifier(s); type = t; expr = e;
-    } // declaration 
+    } // declaration
 }
 
 class Functions extends ArrayList<Function> {
@@ -60,13 +48,13 @@ class Function extends Command  {
     Identifier id;
     Decls params;
     Stmt stmt;
-   
-    Function(String s, Type t) { 
+
+    Function(String s, Type t) {
         id = new Identifier(s); type = t; params = null; stmt = null;
     }
 
-    public String toString ( ) { 
-       return id.toString()+params.toString(); 
+    public String toString ( ) {
+        return id.toString()+params.toString();
     }
 }
 
@@ -83,53 +71,24 @@ class Type {
     final static Type UNDEF = new Type("undef");
     final static Type ERROR = new Type("error");
 
-    // ADD
-//    final static Type STMT = new Type("stmt");
-//    final static Type STMTS = new Type("stmts");
-//    final static Type EMPTY = new Type("empty");
-//    final static Type ASSIGNMENT = new Type("assignment");
-//    final static Type IF = new Type("if");
-//    final static Type WHILE = new Type("while");
-//    final static Type LET = new Type("let");
-//    final static Type READ = new Type("read");
-//    final static Type PRINT = new Type("print");
-    
     protected String id;
     protected Type(String s) { id = s; }
     public String toString ( ) { return id; }
 }
 
 class ProtoType extends Type {
-   // defines the type of a function and its parameters
-   Type result;  
-   Decls params;
-   ProtoType (Type t, Decls ds) {
-      super(t.id);
-      result = t;
-      params = ds;
-   }
+    // defines the type of a function and its parameters
+    Type result;
+    Decls params;
+    ProtoType (Type t, Decls ds) {
+        super(t.id);
+        result = t;
+        params = ds;
+    }
 }
 
 abstract class Stmt extends Command {
     // Stmt = Empty | Stmts | Assignment | If  | While | Let | Read | Print
-
-    protected boolean undef = true;
-    Object value = null; // Type type;
-
-    public Stmt() {
-    }
-
-//    Stmt(Object v) {
-//        if (v instanceof Empty) type = Type.EMPTY;
-//        if (v instanceof Stmts) type = Type.STMTS;
-//        if (v instanceof Assignment) type = Type.ASSIGNMENT;
-//        if (v instanceof If) type = Type.IF;
-//        if (v instanceof While) type = Type.WHILE;
-//        if (v instanceof Let) type = Type.LET;
-//        if (v instanceof Read) type = Type.READ;
-//        if (v instanceof Print) type = Type.PRINT;
-//        value = v; undef = false;
-//    }
 }
 
 class Empty extends Stmt {
@@ -139,20 +98,20 @@ class Empty extends Stmt {
 class Stmts extends Stmt {
     // Stmts = Stmt*
     public ArrayList<Stmt> stmts = new ArrayList<Stmt>();
-    
+
     Stmts() {
-	super(); 
+        super();
     }
 
     Stmts(Stmt s) {
-	stmts.add(s);
+        stmts.add(s);
     }
 }
 
 // (3) Assignment AST Implementation
 class Assignment extends Stmt {
     // Assignment = Identifier id; Expr expr
-	// Assignment Implementation
+    // Assignment Implementation
     Identifier id;
     Expr expr;
     public Assignment(Identifier id, Expr expr) {
@@ -222,21 +181,18 @@ class Print extends Stmt {
     }
 }
 
-// (8) For AST Implementation
+//(8) For AST Implementation
 class For extends Stmt {
-    // For = Type type; Identifier id1; Expr expr1; Expr expr2; Identifier id2; Expr expr3; Stmt stmt;
+    // For = (<decl>; <expr>; <assignment>) <stmt>
     // For Implementation
-    Type type;
-    Identifier id1, id2;
-    Expr expr1, expr2, expr3;
+    Decl decl;
+    Expr expr;
+    Assignment assignment;
     Stmt stmt;
-    public For(Type type, Identifier id1, Expr expr1, Expr expr2, Identifier id2, Expr expr3, Stmt stmt) {
-        this.type = type;
-        this.id1 = id1;
-        this.expr1 = expr1;
-        this.expr2 = expr2;
-        this.id2 = id2;
-        this.expr3 = expr3;
+    public For(Decl decl, Expr expr, Assignment assignment, Stmt stmt) {
+        this.decl = decl;
+        this.expr = expr;
+        this.assignment = assignment;
         this.stmt = stmt;
     }
 }
@@ -252,13 +208,13 @@ class Return extends Stmt {
 }
 
 class Try extends Stmt {
-    // Try = Identifier id; Stmt stmt1; Stmt stmt2; 
+    // Try = Identifier id; Stmt stmt1; Stmt stmt2;
     Identifier eid;
-    Stmt stmt1; 
-    Stmt stmt2; 
+    Stmt stmt1;
+    Stmt stmt2;
 
     Try(Identifier id, Stmt s1, Stmt s2) {
-        eid = id; 
+        eid = id;
         stmt1 = s1;
         stmt2 = s2;
     }
@@ -282,19 +238,15 @@ class Exprs extends ArrayList<Expr> {
 abstract class Expr extends Stmt {
     // Expr = Identifier | Value | Binary | Unary | Call
 
-
-//    public Expr(Object o) {
-//
-//    }
 }
 
-class Call extends Expr { 
-    Identifier fid;  
+class Call extends Expr {
+    Identifier fid;
     Exprs args;
 
     Call(Identifier id, Exprs a) {
-       fid = id;
-       args = a;
+        fid = id;
+        args = a;
     }
 }
 
@@ -305,7 +257,7 @@ class Identifier extends Expr {
     Identifier(String s) { id = s; }
 
     public String toString( ) { return id; }
-    
+
     public boolean equals (Object obj) {
         String s = ((Identifier) obj).id;
         return id.equals(s);
@@ -320,7 +272,7 @@ class Array extends Expr {
     Array(Identifier s, Expr e) {id = s; expr = e;}
 
     public String toString( ) { return id.toString(); }
-    
+
     public boolean equals (Object obj) {
         String s = ((Array) obj).id.toString();
         return id.equals(s);
@@ -328,15 +280,15 @@ class Array extends Expr {
 }
 
 class Value extends Expr {
-    // Value = int | bool | string | array | function 
+    // Value = int | bool | string | array | function
     protected boolean undef = true;
     Object value = null; // Type type;
-    
+
     Value(Type t) {
-        type = t;  
+        type = t;
         if (type == Type.INT) value = Integer.valueOf(0);
-        if (type == Type.BOOL) this.value = Boolean.valueOf(false);
-        if (type == Type.STRING) this.value = "";
+        if (type == Type.BOOL) value = Boolean.valueOf(false);
+        if (type == Type.STRING) value = "";
         undef = false;
     }
 
@@ -346,38 +298,38 @@ class Value extends Expr {
         if (v instanceof String) type = Type.STRING;
         if (v instanceof Function) type = Type.FUN;
         if (v instanceof Value[]) type = Type.ARRAY;
-        value = v; undef = false; 
+        value = v; undef = false;
     }
 
     Object value() { return value; }
 
-    int intValue( ) { 
-        if (value instanceof Integer) 
-            return ((Integer) value).intValue(); 
+    int intValue( ) {
+        if (value instanceof Integer)
+            return ((Integer) value).intValue();
         else return 0;
     }
-    
-    boolean boolValue( ) { 
-        if (value instanceof Boolean) 
-            return ((Boolean) value).booleanValue(); 
+
+    boolean boolValue( ) {
+        if (value instanceof Boolean)
+            return ((Boolean) value).booleanValue();
         else return false;
-    } 
+    }
 
     String stringValue ( ) {
-        if (value instanceof String) 
-            return (String) value; 
+        if (value instanceof String)
+            return (String) value;
         else return "";
     }
 
     Function funValue ( ) {
-        if (value instanceof Function) 
-            return (Function) value; 
+        if (value instanceof Function)
+            return (Function) value;
         else return null;
     }
 
     Value[] arrValue ( ) {
-        if (value instanceof Value[]) 
-            return (Value[]) value; 
+        if (value instanceof Value[])
+            return (Value[]) value;
         else return null;
     }
 
@@ -385,9 +337,9 @@ class Value extends Expr {
 
     public String toString( ) {
         //if (undef) return "undef";
-        if (type == Type.INT) return "" + intValue(); 
+        if (type == Type.INT) return "" + intValue();
         if (type == Type.BOOL) return "" + boolValue();
-	    if (type == Type.STRING) return "" + stringValue();
+        if (type == Type.STRING) return "" + stringValue();
         if (type == Type.FUN) return "" + funValue();
         if (type == Type.ARRAY) return "" + arrValue();
         return "undef";
@@ -396,7 +348,7 @@ class Value extends Expr {
 
 // (1) Binary AST Implementation
 class Binary extends Expr {
-	// Binary = Operator op; Expr expr1; Expr expr2;
+    // Binary = Operator op; Expr expr1; Expr expr2;
     // Binary Implementation
     Operator op;
     Expr expr1, expr2;
@@ -422,16 +374,16 @@ class Unary extends Expr {
 
 class Operator {
     String val;
-    
-    Operator (String s) { 
-	val = s; 
+
+    Operator (String s) {
+        val = s;
     }
 
-    public String toString( ) { 
-	return val; 
+    public String toString( ) {
+        return val;
     }
 
-    public boolean equals(Object obj) { 
-	return val.equals(obj); 
+    public boolean equals(Object obj) {
+        return val.equals(obj);
     }
 }

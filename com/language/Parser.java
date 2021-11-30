@@ -1,16 +1,16 @@
-package com.language;// Parser.java
+package com.language;
 // Parser for language S
 
 public class Parser {
-    Token token;          // current token 
+    Token token;          // current token
     Lexer lexer;
     String funId = "";
 
-    public Parser(Lexer scan) { 
-        lexer = scan;		  
+    public Parser(Lexer scan) {
+        lexer = scan;
         token = lexer.getToken(); // get the first token
     }
-  
+
     private String match(Token t) {
         String value = token.value();
         if (token == t)
@@ -24,94 +24,94 @@ public class Parser {
         System.err.println("Syntax error: " + tok + " --> " + token);
         token=lexer.getToken();
     }
-  
+
     private void error(String tok) {
         System.err.println("Syntax error: " + tok + " --> " + token);
         token=lexer.getToken();
     }
-  
+
     public Command command() {
-    // <command> ->  <decl> | <function> | <stmt>
-	    if (isType()) {
-	        Decl d = decl();
-	        return d;
-	    }
-	    if (token == Token.FUN) {
-	        Function f = function();
-	        return f;
-	    }
-	    if (token != Token.EOF) {
-	        Stmt s = stmt();
+        // <command> ->  <decl> | <function> | <stmt>
+        if (isType()) {
+            Decl d = decl();
+            return d;
+        }
+        if (token == Token.FUN) {
+            Function f = function();
+            return f;
+        }
+        if (token != Token.EOF) {
+            Stmt s = stmt();
             return s;
-	    }
-	    return null;
+        }
+        return null;
     }
 
     private Decl decl() {
-    // <decl>  -> <type> id [=<expr>]; 
+        // <decl>  -> <type> id [=<expr>];
         Type t = type();
-	    String id = match(Token.ID);
-	    Decl d = null;
-	    if (token == Token.LBRACKET) { // array
-           match(Token.LBRACKET);
-           Value v = literal(); 
-	       d = new Decl(id, t, v.intValue());
-           match(Token.RBRACKET);
+        String id = match(Token.ID);
+        Decl d = null;
+        if (token == Token.LBRACKET) { // array
+            match(Token.LBRACKET);
+            Value v = literal();
+            d = new Decl(id, t, v.intValue());
+            match(Token.RBRACKET);
         }
-	    else if (token == Token.ASSIGN) {
-	        match(Token.ASSIGN);
+        else if (token == Token.ASSIGN) {
+            match(Token.ASSIGN);
             Expr e = expr();
-	        d = new Decl(id, t, e);
-	    } else 
+            d = new Decl(id, t, e);
+        } else
             d = new Decl(id, t);
-            match(Token.SEMICOLON);
-	        return d;
-        }
+        match(Token.SEMICOLON);
+        return d;
+    }
 
     private Decls decls () {
-    // <decls> -> {<decl>}
+        // <decls> -> {<decl>}
         Decls ds = new Decls ();
-	    while (isType()) {
-	        Decl d = decl();
-	        ds.add(d);
-	    }
-        return ds;             
+        while (isType()) {
+            Decl d = decl();
+            ds.add(d);
+        }
+        return ds;
     }
 
     private Functions functions () {
-    // <functions> -> { <function> }
-	    Functions fs = new Functions();  
+        // <functions> -> { <function> }
+        Functions fs = new Functions();
         while (token == Token.FUN) {
-	       Function f = function(); 
-	       fs.add(f);
-        }  
-        return fs;            	
+            Function f = function();
+            fs.add(f);
+        }
+        return fs;
     }
 
     private Function function() {
-    // <function>  -> fun <type> id(<params>) <stmt> 
-	    match(Token.FUN);
-	    Type t = type();
-	    String str = match(Token.ID);
-	    funId = str; 
-	    Function f = new Function(str, t);
-	    match(Token.LPAREN);
-	    if (token != Token.RPAREN)
+        // <function>  -> fun <type> id(<params>) <stmt>
+        match(Token.FUN);
+        Type t = type();
+        String str = match(Token.ID);
+        funId = str;
+        Function f = new Function(str, t);
+        match(Token.LPAREN);
+        if (token != Token.RPAREN)
             f.params = params();
-	    match(Token.RPAREN);
-	    Stmt s = stmt();		
-	    f.stmt = s;
-	    return f;
+        match(Token.RPAREN);
+        Stmt s = stmt();
+        f.stmt = s;
+        return f;
     }
 
     private Decls params() {
-	    Decls params = new Decls();
-	    Type t = type();
+        Decls params = new Decls();
+        Type t = type();
         String id = match(Token.ID);
-	    params.add(new Decl(id, t));
+        params.add(new Decl(id, t));
         while (token == Token.COMMA) {
-	        match(Token.COMMA);
-	        t = type();
+            match(Token.COMMA);
+            t = type();
             id = match(Token.ID);
             params.add(new Decl(id, t));
         }
@@ -119,95 +119,91 @@ public class Parser {
     }
 
     private Type type() {
-    // <type>  ->  int | bool | void | string | exc
+        // <type>  ->  int | bool | void | string | exc
         Type t = null;
         switch (token) {
-	    case INT:
-            t = Type.INT; break;
-        case BOOL:
-            t = Type.BOOL; break;
-        case VOID:
-            t = Type.VOID; break;
-        case STRING:
-            t = Type.STRING; break;
-        case EXC:
-            t = Type.EXC; break;
-        default:
-	        error("int | bool | void | string | exc");
-	    }
+            case INT:
+                t = Type.INT; break;
+            case BOOL:
+                t = Type.BOOL; break;
+            case VOID:
+                t = Type.VOID; break;
+            case STRING:
+                t = Type.STRING; break;
+            case EXC:
+                t = Type.EXC; break;
+            default:
+                error("int | bool | void | string | exc");
+        }
         match(token);
-        return t;       
+        return t;
     }
-  
+
     private Stmt stmt() {
-    // <stmt> -> <block> | <assignment> | <ifStmt> | <whileStmt> | ...
+        // <stmt> -> <block> | <assignment> | <ifStmt> | <whileStmt> | ...
         Stmt s = new Empty();
         switch (token) {
-	    case SEMICOLON:
-            match(token.SEMICOLON); return s;
-        case LBRACE:			
-	        match(Token.LBRACE);		
-            s = stmts();
-            match(Token.RBRACE);	
-	        return s;
-        case IF: 	// if statement 
-            s = ifStmt(); return s;
-        case WHILE:      // while statement 
-            s = whileStmt(); return s;
-        case DO:      // do statement 
-            s = doStmt(); return s;
-        case FOR:      // for statement (for implementation)
-            s = forStmt(); return s;
-        case ID:	// assignment
-            s = assignment(); return s;
-	    case LET:	// let statement 
-            s = letStmt(); return s;
-	    case READ:	// read statement 
-            s = readStmt(); return s;
-	    case PRINT:	// print statment 
-            s = printStmt(); return s;
-	    case RETURN:	// return statement 
-            s = returnStmt(); return s;
-	    case TRY:	// try statement 
-            s = tryStmt(); return s;
-	    case RAISE:	// raise statement 
-            s = raiseStmt(); return s;
-        default:  
-	        error("Illegal stmt"); return null; 
-	    }
+            case SEMICOLON:
+                match(token.SEMICOLON); return s;
+            case LBRACE:
+                match(Token.LBRACE);
+                s = stmts();
+                match(Token.RBRACE);
+                return s;
+            case IF: 	// if statement
+                s = ifStmt(); return s;
+            case WHILE:      // while statement
+                s = whileStmt(); return s;
+            case DO:      // do statement
+                s = doStmt(); return s;
+            case FOR:      // for statement (for implementation)
+                s = forStmt(); return s;
+            case ID:	// assignment
+                s = assignment(); return s;
+            case LET:	// let statement
+                s = letStmt(); return s;
+            case READ:	// read statement
+                s = readStmt(); return s;
+            case PRINT:	// print statment
+                s = printStmt(); return s;
+            case RETURN:	// return statement
+                s = returnStmt(); return s;
+            case TRY:	// try statement
+                s = tryStmt(); return s;
+            case RAISE:	// raise statement
+                s = raiseStmt(); return s;
+            default:
+                error("Illegal stmt"); return null;
+        }
     }
 
     private For forStmt() {
+
         match(Token.FOR);
         match(Token.LPAREN);
-        Type type = type();
-        Identifier id1 = new Identifier(match(Token.ID));
-        match(Token.ASSIGN);
-        Expr expr1 = expr();
+        Decl decl = decl();
+        Expr expr = expr();
         match(Token.SEMICOLON);
-        Expr expr2 = expr();
-        match(Token.SEMICOLON);
-        Identifier id2 = new Identifier(match(Token.ID));
-        match(Token.ASSIGN);
-        Expr expr3 = expr();
+        Assignment assignment = assignmentByFor();
         match(Token.RPAREN);
         Stmt stmt = stmt();
-        return new For(type, id1, expr1, expr2, id2, expr3, stmt);
+
+        return new For(decl, expr, assignment, stmt);
     }
 
     private Stmts stmts () {
-    // <stmts> -> {<stmt>}
+        // <stmts> -> {<stmt>}
         Stmts ss = new Stmts();
-	    while((token != Token.RBRACE) && (token != Token.END))
-	        ss.stmts.add(stmt()); 
+        while((token != Token.RBRACE) && (token != Token.END))
+            ss.stmts.add(stmt());
         return ss;
     }
 
-    
+
     //(6) Let Parser Implementation
     private Let letStmt () {
-    	// <letStmt> -> let <decls> in <block> end
-    	// Let Implementation
+        // <letStmt> -> let <decls> in <block> end
+        // Let Implementation
         match(Token.LET);
         Decls ds = decls();
         match(Token.IN);
@@ -217,20 +213,20 @@ public class Parser {
         return new Let(ds, null, ss);
     }
 
-	//(7) Read Parser Implementation
+    //(7) Read Parser Implementation
     private Read readStmt() {
-    	// <readStmt> -> read id;
-    	// Read Implementation
+        // <readStmt> -> read id;
+        // Read Implementation
         match(Token.READ);
         Identifier id = new Identifier(match(Token.ID));
         match(Token.SEMICOLON);
         return new Read(id);
     }
 
-	//(8) Print Parser Implementation
+    //(8) Print Parser Implementation
     private Print printStmt() {
-    	// <printStmt> -> print <expr>;
-    	// Print Implementation
+        // <printStmt> -> print <expr>;
+        // Print Implementation
         match(Token.PRINT);
         Expr e = expr();
         match(Token.SEMICOLON);
@@ -238,40 +234,50 @@ public class Parser {
     }
 
     private Return returnStmt() {
-    // <returnStmt> -> return <expr>; 
+        // <returnStmt> -> return <expr>;
         match(Token.RETURN);
         Expr e = expr();
         match(Token.SEMICOLON);
         return new Return(funId, e);
     }
 
-    
-	// (3) Assignment Parser Implementation
+
+    // (3) Assignment Parser Implementation
     private Stmt assignment() {
-    	// <assignment> -> id = <expr>;   
-    	// Assignment Implementation
+        // <assignment> -> id = <expr>;
+        // Assignment Implementation
         Identifier id = new Identifier(match(Token.ID));
         match(Token.ASSIGN);
         Expr e = expr();
         match(Token.SEMICOLON);
         return new Assignment(id, e);
     }
-    
+
+    private Assignment assignmentByFor() {
+        // <assignment> -> id = <expr>;
+        // Assignment Implementation
+        Identifier id = new Identifier(match(Token.ID));
+        match(Token.ASSIGN);
+        Expr e = expr();
+        return new Assignment(id, e);
+    }
+
+
 
     private Call call(Identifier id) {
-    // <call> -> id(<expr>{,<expr>});
-	    match(Token.LPAREN);
+        // <call> -> id(<expr>{,<expr>});
+        match(Token.LPAREN);
         Call c = new Call(id, arguments());
         match(Token.RPAREN);
-	    match(Token.SEMICOLON);
+        match(Token.SEMICOLON);
         return c;
     }
 
-    
-	// (4) If Parser Implementation
+
+    // (4) If Parser Implementation
     private If ifStmt () {
-    	// <ifStmt> -> if (<expr>) then <stmt> [else <stmt>]
-    	// If Implementation
+        // <ifStmt> -> if (<expr>) then <stmt> [else <stmt>]
+        // If Implementation
         match(Token.IF);
         match(Token.LPAREN);
         Expr e = expr();
@@ -286,10 +292,10 @@ public class Parser {
         return new If(e, s1, s2);
     }
 
-	// (5) While Parser Implementation
+    // (5) While Parser Implementation
     private While whileStmt () {
-    	// <whileStmt> -> while (<expr>) <stmt>
-    	// While Implementation
+        // <whileStmt> -> while (<expr>) <stmt>
+        // While Implementation
         match(Token.WHILE);
         match(Token.LPAREN);
         Expr e = expr();
@@ -298,24 +304,24 @@ public class Parser {
         return new While(e, s);
     }
 
-    
+
     private Stmts doStmt() {
-    // <whileStmt> -> do <stmt> while (<expr>) 
+        // <whileStmt> -> do <stmt> while (<expr>)
         match(Token.DO);
         Stmt s = stmt();
         match(Token.WHILE);
         match(Token.LPAREN);
         Expr e = expr();
         match(Token.RPAREN);
-        Stmts ss = new Stmts(s); 
+        Stmts ss = new Stmts(s);
         ss.stmts.add(new While(e, s));
         return ss;
     }
 
     private Try tryStmt () {
-    // <tryStmt> -> try <stmt> {catch(id) <stmt>}
+        // <tryStmt> -> try <stmt> {catch(id) <stmt>}
         match(Token.TRY);
-        Stmt s1 = stmt(); 
+        Stmt s1 = stmt();
         match(Token.CATCH);
         match(Token.LPAREN);
         Identifier id = new Identifier(match(Token.ID));
@@ -334,26 +340,26 @@ public class Parser {
     }
 
     private Raise raiseStmt() {
-    // <raiseStmt> -> raise id; 
+        // <raiseStmt> -> raise id;
         match(Token.RAISE);
         Identifier id = new Identifier(match(Token.ID));
         match(Token.SEMICOLON);
-        return new Raise(id); 
+        return new Raise(id);
     }
 
     private Expr expr () {
-    // <expr> -> <bexp> {& <bexp> | '|'<bexp>} | !<expr> | true | false
+        // <expr> -> <bexp> {& <bexp> | '|'<bexp>} | !<expr> | true | false
         switch (token) {
-	    case NOT:
-	        Operator op = new Operator(match(token));
-	        Expr e = expr();
-            return new Unary(op, e);
-        case TRUE:
-            match(Token.TRUE);
-            return new Value(true);
-        case FALSE:
-            match(Token.FALSE);
-            return new Value(false);
+            case NOT:
+                Operator op = new Operator(match(token));
+                Expr e = expr();
+                return new Unary(op, e);
+            case TRUE:
+                match(Token.TRUE);
+                return new Value(true);
+            case FALSE:
+                match(Token.FALSE);
+                return new Value(false);
         }
 
         Expr e = bexp();
@@ -369,15 +375,15 @@ public class Parser {
         // <bexp> -> <aexp> [ (< | <= | > | >= | == | !=) <aexp> ]
         Expr e = aexp();
         switch(token) {
-        case LT: case LTEQ: case GT: case GTEQ: case EQUAL: case NOTEQ:
-            Operator op = new Operator(match(token));
-            Expr a = aexp();
-            e = new Binary(op, e, a);
+            case LT: case LTEQ: case GT: case GTEQ: case EQUAL: case NOTEQ:
+                Operator op = new Operator(match(token));
+                Expr a = aexp();
+                e = new Binary(op, e, a);
         }
         return e;
     }
-  
-    
+
+
     // (1) Expr Implementation 1 (aexp -> "+" & "-")
     private Expr aexp () {
         // <aexp> -> <term> { + <term> | - <term> }
@@ -390,7 +396,7 @@ public class Parser {
         }
         return e;
     }
-  
+
     // (2) Expr Implementation 2 (term -> "*" & "/")
     private Expr term () {
         // <term> -> <factor> { * <factor> | / <factor>}
@@ -403,50 +409,50 @@ public class Parser {
         }
         return t;
     }
-    
-  
+
+
     private Expr factor() {
         // <factor> -> [-](id | <call> | literal | '('<aexp> ')')
         Operator op = null;
-        if (token == Token.MINUS) 
+        if (token == Token.MINUS)
             op = new Operator(match(Token.MINUS));
 
         Expr e = null;
         switch(token) {
-        case ID:
-            Identifier v = new Identifier(match(Token.ID));
-            e = v;
-            if (token == Token.LPAREN) {  // function call
-                match(Token.LPAREN); 
-                Call c = new Call(v,arguments());
+            case ID:
+                Identifier v = new Identifier(match(Token.ID));
+                e = v;
+                if (token == Token.LPAREN) {  // function call
+                    match(Token.LPAREN);
+                    Call c = new Call(v,arguments());
+                    match(Token.RPAREN);
+                    e = c;
+                } else if (token == Token.LBRACKET) {  // array
+                    match(Token.LBRACKET);
+                    Array a = new Array(v,expr());
+                    match(Token.RBRACKET);
+                    e = a;
+                }
+                break;
+            case NUMBER: case STRLITERAL:
+                e = literal();
+                break;
+            case LPAREN:
+                match(Token.LPAREN);
+                e = aexp();
                 match(Token.RPAREN);
-                e = c;
-            } else if (token == Token.LBRACKET) {  // array 
-                match(Token.LBRACKET); 
-                Array a = new Array(v,expr());
-                match(Token.RBRACKET);
-                e = a;
-            }
-            break;
-        case NUMBER: case STRLITERAL: 
-            e = literal();
-            break; 
-        case LPAREN: 
-            match(Token.LPAREN); 
-            e = aexp();       
-            match(Token.RPAREN);
-            break; 
-        default: 
-            error("Identifier | Literal"); 
+                break;
+            default:
+                error("Identifier | Literal");
         }
 
         if (op != null)
             return new Unary(op, e);
         else return e;
     }
-  
+
     private Exprs arguments() {
-    // arguments -> [ <expr> {, <expr> } ]
+        // arguments -> [ <expr> {, <expr> } ]
         Exprs es = new Exprs();
         while (token != Token.RPAREN) {
             es.add(expr());
@@ -454,66 +460,66 @@ public class Parser {
                 match(Token.COMMA);
             else if (token != Token.RPAREN)
                 error("Exprs");
-        }  
-        return es;  
+        }
+        return es;
     }
 
     private Value literal( ) {
         String s = null;
         switch (token) {
-        case NUMBER:
-            s = match(Token.NUMBER);
-            return new Value(Integer.parseInt(s));
-        case STRLITERAL:
-            s = match(Token.STRLITERAL);
-            return new Value(s);
+            case NUMBER:
+                s = match(Token.NUMBER);
+                return new Value(Integer.parseInt(s));
+            case STRLITERAL:
+                s = match(Token.STRLITERAL);
+                return new Value(s);
         }
         throw new IllegalArgumentException( "no literal");
     }
- 
+
     private boolean isType( ) {
         switch(token) {
-        case INT: case BOOL: case STRING:  case EXC: 
-            return true;
-        default: 
-            return false;
+            case INT: case BOOL: case STRING:  case EXC:
+                return true;
+            default:
+                return false;
         }
     }
-    
+
     public static void main(String args[]) {
-	    Parser parser;
-	    if (args.length == 0) {
+        Parser parser;
+        if (args.length == 0) {
             System.out.println("Begin parsing... ");
-	        System.out.print(">> ");
-	        Lexer.interactive = true;
-	        parser  = new Parser(new Lexer());
-	        do {
-	            if (parser.token == Token.EOF) {
-		            parser.token = parser.lexer.getToken();
-		        }
-		        Command command = null;
+            System.out.print(">> ");
+            Lexer.interactive = true;
+            parser  = new Parser(new Lexer());
+            do {
+                if (parser.token == Token.EOF) {
+                    parser.token = parser.lexer.getToken();
+                }
+                Command command = null;
                 try {
                     command = parser.command();
                 } catch (Exception e) {
                     System.err.println(e);
                 }
-		        System.out.print("\n>> ");
-	        } while(true);
-	    }
-    	else {
-	        System.out.println("Begin parsing... " + args[0]);
-	        parser  = new Parser(new Lexer(args[0]));
-	        Command command = null;
-	        do {
-			    if (parser.token == Token.EOF)
+                System.out.print("\n>> ");
+            } while(true);
+        }
+        else {
+            System.out.println("Begin parsing... " + args[0]);
+            parser  = new Parser(new Lexer(args[0]));
+            Command command = null;
+            do {
+                if (parser.token == Token.EOF)
                     break;
 
                 try {
-		            command = parser.command();
+                    command = parser.command();
                 } catch (Exception e) {
                     System.err.println(e);
                 }
-	        } while (command != null);
-	    }
+            } while (command != null);
+        }
     } //main
 } // Parser
